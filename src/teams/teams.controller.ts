@@ -7,7 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Query,
+  Query, UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -17,8 +17,10 @@ import { GetTeamFilterDto } from './dto/get-team-filter.dto';
 import { TeamStatusValidationPipe } from './pipes/team-status-validation.pipe';
 import { Team } from './team.entity';
 import { TeamStatus } from './team-status.enum';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('teams')
+@UseGuards(AuthGuard())
 export class TeamsController {
 
   constructor(private teamsService: TeamsService) {}
