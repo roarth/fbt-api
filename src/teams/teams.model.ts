@@ -7,5 +7,5 @@ export interface Team {
 
 export enum TeamStatus {
   OPENED = 'OPENED',
-  COMPLETE = 'COMPLETE',
+  COMPLETED = 'COMPLETED',
 }

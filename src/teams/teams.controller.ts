@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { Team, TeamStatus } from './teams.model';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { GetTeamFilterDto } from './dto/get-team-filter.dto';
+import { TeamStatusValidationPipe } from './pipes/team-status-validation.pipe';
 
 @Controller('teams')
 export class TeamsController {
@@ -9,8 +11,12 @@ export class TeamsController {
   constructor(private teamsService: TeamsService) {}
 
   @Get()
-  getAllTeams() {
-    return this.teamsService.getAllTeams();
+  getTeams(@Query(ValidationPipe) filterDto: GetTeamFilterDto) {
+    if(Object.keys(filterDto).length) {
+      return this.teamsService.getTeamsWithFilters(filterDto);
+    } else {
+      return this.teamsService.getAllTeams();
+    }
   }
 
   @Get('/:id')
@@ -19,6 +25,7 @@ export class TeamsController {
   }
 
   @Post()
+  @UsePipes(ValidationPipe)
   createTeam(@Body() createTeamDto: CreateTeamDto): Team {
     return this.teamsService.createTeam(createTeamDto);
   }
@@ -26,7 +33,7 @@ export class TeamsController {
   @Patch('/:id/status')
   updateTeamStatus(
     @Param('id') id: string,
-    @Body('status') status: TeamStatus
+    @Body('status', TeamStatusValidationPipe) status: TeamStatus
   ): Team {
     return this.teamsService.updateTeamStatus(id, status);
   }
