@@ -1,69 +1,50 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Team, TeamStatus } from './teams.model';
-import { v4 as uuidv4 } from 'uuid';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { TeamRepository } from './team.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Team } from './team.entity';
+import { TeamStatus } from './team-status.enum';
 import { GetTeamFilterDto } from './dto/get-team-filter.dto';
 
 @Injectable()
 export class TeamsService {
 
-  private teams = [];
+  constructor(
+    @InjectRepository(TeamRepository)
+    private teamRepository: TeamRepository,
+  ) {}
 
-  getAllTeams(): Team[] {
-    return this.teams;
+  async getTeams(filterDto: GetTeamFilterDto): Promise<Team[]> {
+    return this.teamRepository.getTeams(filterDto);
   }
 
-  getTeamsWithFilters(filterDto: GetTeamFilterDto): Team[] {
-    const { status, search } = filterDto;
-
-    let teams = this.getAllTeams();
-
-    if(status) {
-      teams = teams.filter(team => team.status === status);
-    }
-
-    if(search) {
-      teams = teams.filter(team =>
-        team.name.includes(search) ||
-        team.description.includes(search),
-      );
-    }
-
-    return teams;
-  }
-
-  getTeamById(id: string): Team {
-    const found =  this.teams.find(team => team.id === id);
+  async getTeamById(id: string): Promise<Team> {
+    const found = await this.teamRepository.findOne(id);
 
     if(!found) {
-      throw new NotFoundException(`Task with id ${id} does not exists`);
+      throw new NotFoundException(`Team with id ${id} does not exists`);
     }
 
     return found;
   }
 
-  createTeam(createTeamDto: CreateTeamDto): Team {
-    const { name, description } = createTeamDto;
-
-    const team: Team = {
-      id: uuidv4(),
-      name,
-      description,
-      status: TeamStatus.OPENED
-    };
-
-    this.teams.push(team);
-    return team;
+  async createTeam(createTeamDto: CreateTeamDto): Promise<Team> {
+   return this.teamRepository.createTeam(createTeamDto);
   }
 
-  updateTeamStatus(id: string, status: TeamStatus): Team {
-    const team = this.getTeamById(id);
+  async deleteTeam(id: string): Promise<void> {
+    const result = await this.teamRepository.delete(id);
+
+    if(result.affected === 0) {
+      throw new NotFoundException(`Team with id ${id} does not exists`);
+    }
+  }
+
+  async updateTeamStatus(id: string, status: TeamStatus): Promise<Team> {
+    const team = await this.getTeamById(id);
     team.status = status;
-    return team;
-  }
+    await team.save();
 
-  deleteTeam(id: string): void {
-    const found = this.getTeamById(id);
-    this.teams = this.teams.filter(team => team.id !== found.id);
+    return team;
   }
 }

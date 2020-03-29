@@ -1,4 +1,4 @@
-import { TeamStatus } from '../teams.model';
+import { TeamStatus } from '../team-status.enum';
 import { IsIn, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class GetTeamFilterDto {

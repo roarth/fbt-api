@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { TeamStatus } from './teams.model';
+import { TeamStatus } from './team-status.enum';
 
 @Entity()
 export class Team extends BaseEntity {

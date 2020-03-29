@@ -1,5 +1,5 @@
 import { BadRequestException, PipeTransform } from '@nestjs/common';
-import { TeamStatus } from '../teams.model';
+import { TeamStatus } from '../team-status.enum';
 
 export class TeamStatusValidationPipe implements PipeTransform {
 
