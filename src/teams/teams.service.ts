@@ -29,4 +29,14 @@ export class TeamsService {
     this.teams.push(team);
     return team;
   }
+
+  updateTeamStatus(id: string, status: TeamStatus): Team {
+    const team = this.getTeamById(id);
+    team.status = status;
+    return team;
+  }
+
+  deleteTeam(id: string): void {
+    this.teams = this.teams.filter(team => team.id !== id);
+  }
 }
