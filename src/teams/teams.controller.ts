@@ -18,6 +18,8 @@ import { TeamStatusValidationPipe } from './pipes/team-status-validation.pipe';
 import { Team } from './team.entity';
 import { TeamStatus } from './team-status.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../auth/user.entity';
 
 @Controller('teams')
 @UseGuards(AuthGuard())
@@ -28,50 +30,68 @@ export class TeamsController {
   /**
    * Get Teams, with or without filter (search & status)
    * @param filterDto
+   * @param user
    */
   @Get()
-  getTeams(@Query(ValidationPipe) filterDto: GetTeamFilterDto): Promise<Team[]> {
-    return this.teamsService.getTeams(filterDto);
+  getTeams(
+    @Query(ValidationPipe) filterDto: GetTeamFilterDto,
+    @GetUser() user: User
+  ): Promise<Team[]> {
+    return this.teamsService.getTeams(filterDto, user);
   }
 
   /**
    * Get a Team by it's id
    * @param id
+   * @param user
    */
   @Get('/:id')
-  getTeamById(@Param('id', new ParseUUIDPipe({version: '4'})) id: string): Promise<Team> {
-    return this.teamsService.getTeamById(id);
+  getTeamById(
+    @Param('id', new ParseUUIDPipe({version: '4'})) id: string,
+    @GetUser() user: User
+  ): Promise<Team> {
+    return this.teamsService.getTeamById(id, user);
   }
 
   /**
    * Create a Team
    * @param createTeamDto
+   * @param user
    */
   @Post()
   @UsePipes(ValidationPipe)
-  createTeam(@Body() createTeamDto: CreateTeamDto): Promise<Team> {
-    return this.teamsService.createTeam(createTeamDto);
+  createTeam(
+    @Body() createTeamDto: CreateTeamDto,
+    @GetUser() user: User
+  ): Promise<Team> {
+    return this.teamsService.createTeam(createTeamDto, user);
   }
 
   /**
    * Update a Team Status
    * @param id
    * @param status
+   * @param user
    */
   @Patch('/:id/status')
   updateTeamStatus(
     @Param('id', new ParseUUIDPipe({version: '4'})) id: string,
-    @Body('status', TeamStatusValidationPipe) status: TeamStatus
+    @Body('status', TeamStatusValidationPipe) status: TeamStatus,
+    @GetUser() user: User
   ): Promise<Team> {
-    return this.teamsService.updateTeamStatus(id, status);
+    return this.teamsService.updateTeamStatus(id, status, user);
   }
 
   /**
    * Delete a Team
    * @param id
+   * @param user
    */
   @Delete('/:id')
-  deleteTeam(@Param('id', new ParseUUIDPipe({version: '4'})) id: string): Promise<void> {
-    return this.teamsService.deleteTeam(id);
+  deleteTeam(
+    @Param('id', new ParseUUIDPipe({version: '4'})) id: string,
+    @GetUser() user: User
+  ): Promise<void> {
+    return this.teamsService.deleteTeam(id, user);
   }
 }
