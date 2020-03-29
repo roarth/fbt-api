@@ -8,6 +8,10 @@ import { filter } from 'rxjs/operators';
 @EntityRepository(Team)
 export class TeamRepository extends Repository<Team> {
 
+  /**
+   * Get All Team with or without filter
+   * @param filterDto
+   */
   async getTeams(filterDto: GetTeamFilterDto): Promise<Team[]> {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('team');
@@ -24,6 +28,10 @@ export class TeamRepository extends Repository<Team> {
     return teams;
   }
 
+  /**
+   * Create a Team
+   * @param createTeamDto
+   */
   async createTeam(createTeamDto: CreateTeamDto): Promise<Team> {
     const { name, description } = createTeamDto;
 
