@@ -3,11 +3,13 @@ import { Team } from './team.entity';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { TeamStatus } from './team-status.enum';
 import { GetTeamFilterDto } from './dto/get-team-filter.dto';
-import { filter } from 'rxjs/operators';
 import { User } from '../auth/user.entity';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 
 @EntityRepository(Team)
 export class TeamRepository extends Repository<Team> {
+
+  private logger = new Logger('TeamRepository');
 
   /**
    * Get All Team with or without filter
@@ -31,13 +33,18 @@ export class TeamRepository extends Repository<Team> {
       query.andWhere('(team.name LIKE :search OR team.description LIKE :search)', { search: `%${search}%`})
     }
 
-    const teams = await query.getMany();
-    return teams;
+    try {
+      return await query.getMany();
+    } catch (error) {
+      this.logger.error(`Failed to get Teams for user "${user.email}". Filters: ${JSON.stringify(filterDto)}`, error.stack);
+      throw new InternalServerErrorException();
+    }
   }
 
   /**
    * Create a Team
    * @param createTeamDto
+   * @param user
    */
   async createTeam(
     createTeamDto: CreateTeamDto,
@@ -50,7 +57,13 @@ export class TeamRepository extends Repository<Team> {
     team.description = description;
     team.status = TeamStatus.OPENED;
     team.leader = user;
-    await team.save();
+
+    try {
+      await team.save();
+    } catch (error) {
+      this.logger.error(`Failed to create a Team for user "${user.email}". Data: ${JSON.stringify(createTeamDto)}`, error.stack);
+      throw new InternalServerErrorException();
+    }
 
     delete team.leader;
 

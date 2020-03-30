@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, Logger,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -25,6 +25,8 @@ import { User } from '../auth/user.entity';
 @UseGuards(AuthGuard())
 export class TeamsController {
 
+  private logger = new Logger('TeamsController');
+
   constructor(private teamsService: TeamsService) {}
 
   /**
@@ -37,6 +39,7 @@ export class TeamsController {
     @Query(ValidationPipe) filterDto: GetTeamFilterDto,
     @GetUser() user: User
   ): Promise<Team[]> {
+    this.logger.verbose(`User "${user.email}" retrieving all Teams. Filters: ${JSON.stringify(filterDto)}`);
     return this.teamsService.getTeams(filterDto, user);
   }
 
@@ -64,6 +67,7 @@ export class TeamsController {
     @Body() createTeamDto: CreateTeamDto,
     @GetUser() user: User
   ): Promise<Team> {
+    this.logger.verbose(`User "${user.email}" creating a new Team. Data: ${JSON.stringify(createTeamDto)}`);
     return this.teamsService.createTeam(createTeamDto, user);
   }
 
